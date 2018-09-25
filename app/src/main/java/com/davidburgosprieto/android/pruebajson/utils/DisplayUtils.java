@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson;
+package com.davidburgosprieto.android.pruebajson.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -7,6 +7,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
+
+import com.davidburgosprieto.android.pruebajson.R;
 
 public class DisplayUtils {
     private static final String TAG = DisplayUtils.class.getSimpleName();

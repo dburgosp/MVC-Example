@@ -2,25 +2,23 @@ package com.davidburgosprieto.android.pruebajson;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
+import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
+import com.davidburgosprieto.android.pruebajson.utils.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +65,9 @@ public class MainActivity extends AppCompatActivity
                 new NewsListAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(News item, View clickedView) {
-                        Toast.makeText(context, "News clicked", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(context, WebViewActivity.class);
+                        intent.putExtra("url", item.getUrl());
+                        startActivity(intent);
                     }
                 };
 
@@ -131,14 +131,29 @@ public class MainActivity extends AppCompatActivity
                 });
 
                 // Display newer news result.
-                setFirstNews(news.get(0));
+                TextView headerTextView = (TextView) findViewById(R.id.first_news_ticker_and_header);
+                TextView titleTextView = (TextView) findViewById(R.id.first_news_title);
+                TextView dateTextView = (TextView) findViewById(R.id.first_news_date);
+                ImageView imageView = (ImageView) findViewById(R.id.first_news_image);
+                newsListAdapter.displayNews(context, news.get(0), imageView, titleTextView,
+                        headerTextView, dateTextView, DateTimeUtils.DATE_FORMAT_FULL,true);
+                firstNewsLayout.setVisibility(View.VISIBLE);
+                firstNewsLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(context, WebViewActivity.class);
+                        intent.putExtra("url", news.get(0).getUrl());
+                        startActivity(intent);
+                    }
+                });
 
                 // Display the other news.
-                ArrayList<News> otherNews = news;
+                ArrayList<News> otherNews = new ArrayList<>(news);
                 otherNews.remove(0);
                 newsListAdapter.updateNewsArrayList(otherNews);
                 recyclerView.setVisibility(View.VISIBLE);
 
+                // TODO: show news elements playing some cool animation.
             } else {
                 // No data has been fetched from server.
                 loadingTextView.setText(R.string.no_data);
@@ -151,78 +166,5 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(@NonNull Loader<ArrayList<News>> loader) {
-    }
-
-    /**
-     * Helper method for displaying newer news.
-     *
-     * @param newerNews is the {@link News} element to be displayed.
-     */
-    private void setFirstNews(News newerNews) {
-        firstNewsLayout.setVisibility(View.VISIBLE);
-
-        // News ticker and header.
-        TextView tickerAndHeaderTextView = (TextView) findViewById(R.id.first_news_ticker_and_header);
-        String htmlText = "";
-        String newsTicker = newerNews.getNewsTicker();
-        String header = newerNews.getHeader();
-        if (!newsTicker.equals("")) {
-            htmlText = "<strong>" + newsTicker + "</strong>";
-            if (!header.equals(""))
-                htmlText = htmlText + " · " + header;
-        } else if (!header.equals(""))
-            htmlText = header;
-        if (!htmlText.equals(""))
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                tickerAndHeaderTextView.setText(Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                tickerAndHeaderTextView.setText(Html.fromHtml(htmlText));
-            }
-        else
-            tickerAndHeaderTextView.setVisibility(View.GONE);
-
-        // News title.
-        TextView titleTextView = (TextView) findViewById(R.id.first_news_title);
-        String title = newerNews.getTitle();
-        if (!title.equals(""))
-            titleTextView.setText(title);
-        else
-            titleTextView.setVisibility(View.GONE);
-
-
-        // News date.
-        TextView dateTextView = (TextView) findViewById(R.id.first_news_date);
-        View lineView = findViewById(R.id.first_news_line);
-        String date = DateTimeUtils.getStringFromDate(newerNews.getDate(),
-                DateTimeUtils.DATE_FORMAT_FULL);
-        if (!title.equals(""))
-            dateTextView.setText(date);
-        else {
-            // No date. Hide dateTextView and lineView.
-            dateTextView.setVisibility(View.GONE);
-            lineView.setVisibility(View.GONE);
-        }
-
-        // News image.
-        ImageView imageView = (ImageView) findViewById(R.id.first_news_image);
-        String image = newerNews.getImage();
-        if (!image.equals("")) {
-            // Calculate image size for scaleType="centerCrop", depending on display size and 
-            // original image width and height.
-            final DisplayUtils displayUtils = new DisplayUtils(context);
-            int widthPixels = displayUtils.getFullDisplayBackdropWidthPixels();
-            int heightPixels = (widthPixels *
-                    newerNews.getImageHeight() / newerNews.getImageWidth());
-
-            // Display image using Picasso. If there is any error, show default image
-            // R.drawable.no_backdrop.
-            Picasso.with(context)
-                    .load(image)
-                    .resize(widthPixels, heightPixels)
-                    .centerCrop()
-                    .error(R.drawable.no_backdrop)
-                    .into(imageView);
-        } else
-            imageView.setVisibility(View.GONE);
     }
 }

@@ -5,6 +5,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.os.OperationCanceledException;
 import android.util.Log;
 
+import com.davidburgosprieto.android.pruebajson.utils.NewsJSONUtils;
+
 import java.util.ArrayList;
 
 public class NewsAsyncTaskLoader extends AsyncTaskLoader<ArrayList<News>> {

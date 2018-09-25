@@ -1,13 +1,10 @@
-package com.davidburgosprieto.android.pruebajson;
+package com.davidburgosprieto.android.pruebajson.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;

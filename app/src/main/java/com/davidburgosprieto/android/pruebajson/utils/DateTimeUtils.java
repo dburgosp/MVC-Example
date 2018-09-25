@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson;
+package com.davidburgosprieto.android.pruebajson.utils;
 
 import android.util.Log;
 
@@ -53,7 +53,8 @@ public final class DateTimeUtils {
      */
     public static String getStringFromDate(Date inputDate, int dateFormat) {
         // Format output date string.
-        DateFormat dateFormatOut = DateFormat.getDateInstance(dateFormat, Locale.getDefault());
+        DateFormat dateFormatOut = DateFormat.getDateTimeInstance(dateFormat, DateFormat.SHORT,
+                Locale.getDefault());
         return dateFormatOut.format(inputDate);
     }
 }

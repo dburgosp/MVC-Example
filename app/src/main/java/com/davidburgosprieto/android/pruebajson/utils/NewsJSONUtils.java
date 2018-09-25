@@ -1,7 +1,9 @@
-package com.davidburgosprieto.android.pruebajson;
+package com.davidburgosprieto.android.pruebajson.utils;
 
 import android.net.Uri;
 import android.util.Log;
+
+import com.davidburgosprieto.android.pruebajson.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -1,21 +1,21 @@
 package com.davidburgosprieto.android.pruebajson;
 
 import android.content.Context;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
+import com.davidburgosprieto.android.pruebajson.utils.DisplayUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class NewsListAdapter
         extends RecyclerView.Adapter<NewsListAdapter.NewsListViewHolder> {
@@ -153,7 +153,7 @@ public class NewsListAdapter
         private final String TAG = NewsListViewHolder.class.getSimpleName();
 
         private ImageView imageView;
-        private TextView titleTextView, headerTextView, dateTextView, newsTickerTextView;
+        private TextView titleTextView, headerTextView, dateTextView;
 
         private Context context;
         private View viewHolder;
@@ -165,13 +165,12 @@ public class NewsListAdapter
          */
         NewsListViewHolder(View itemView) {
             super(itemView);
-            
+
             // Get layout elements.
             imageView = (ImageView) itemView.findViewById(R.id.news_image);
             titleTextView = (TextView) itemView.findViewById(R.id.news_title);
             headerTextView = (TextView) itemView.findViewById(R.id.news_header);
             dateTextView = (TextView) itemView.findViewById(R.id.news_date);
-            newsTickerTextView = (TextView) itemView.findViewById(R.id.news_ticker);
 
             context = itemView.getContext();
             viewHolder = itemView;
@@ -186,51 +185,13 @@ public class NewsListAdapter
          *                    NewsListViewHolder element.
          * @param listener    is the listener for click events.
          */
-        public void bind(final News currentNews,
-                         final NewsListAdapter.OnItemClickListener listener) {
+        void bind(final News currentNews,
+                  final NewsListAdapter.OnItemClickListener listener) {
             String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
             Log.i(TAG + "." + methodName, "Binding data for the current NewsListViewHolder.");
 
-            // News image.
-            String image = currentNews.getImage();
-            if (!image.equals("")) {
-                // Display image using Picasso. If there is any error, show default image
-                // R.drawable.no_backdrop.
-                Picasso.with(context)
-                        .load(image)
-                        .error(R.drawable.no_backdrop)
-                        .into(imageView);
-            } else
-                imageView.setVisibility(View.GONE);
-
-            // News header.
-            String header = currentNews.getHeader();
-            if (!header.equals(""))
-                headerTextView.setText(header);
-            else
-                headerTextView.setVisibility(View.GONE);
-
-            // News title.
-            String title = currentNews.getTitle();
-            if (!title.equals(""))
-                titleTextView.setText(title);
-            else
-                titleTextView.setVisibility(View.GONE);
-
-            // News date.
-            String date = DateTimeUtils.getStringFromDate(currentNews.getDate(),
-                    DateTimeUtils.DATE_FORMAT_MEDIUM);
-            if (!title.equals(""))
-                dateTextView.setText(date);
-            else
-                dateTextView.setVisibility(View.GONE);
-
-            // News ticker.
-            String newsTicker = currentNews.getNewsTicker();
-            if (!newsTicker.equals(""))
-                newsTickerTextView.setText(newsTicker);
-            else
-                newsTickerTextView.setVisibility(View.GONE);
+            displayNews(context, currentNews, imageView, titleTextView, headerTextView, dateTextView,
+                    DateTimeUtils.DATE_FORMAT_MEDIUM, false);
 
             // Set the listener for click events.
             viewHolder.setOnClickListener(new View.OnClickListener() {
@@ -240,5 +201,86 @@ public class NewsListAdapter
                 }
             });
         }
+    }
+
+    /**
+     * Helper method for displaying news on screen.
+     *
+     * @param context        is the context of the calling activity.
+     * @param currentNews    is the {@link News} object to be displayed.
+     * @param imageView      is the ImageView for the news image.
+     * @param titleTextView  is the TextView for the news title.
+     * @param headerTextView is the TextView for the news ticker and header.
+     * @param dateTextView   is the TextView for the news publishing date.
+     * @param dateFormat     is the format in which news date will be displayed.
+     * @param fullScreen     is true if the image must be displayed in full width, and false if the
+     *                       image must be displayed using the fixed sizes of the ImageView.
+     */
+    public void displayNews(Context context, News currentNews, ImageView imageView,
+                            TextView titleTextView, TextView headerTextView,
+                            TextView dateTextView, int dateFormat, boolean fullScreen) {
+        // News image.
+        String image = currentNews.getImage();
+        if (!image.equals("")) {
+            // Display image using Picasso. If there is any error, show default image
+            // R.drawable.no_backdrop.
+            if (fullScreen) {
+                // Calculate image size for scaleType="centerCrop", depending on display size and
+                // original image width and height.
+                final DisplayUtils displayUtils = new DisplayUtils(context);
+                int widthPixels = displayUtils.getFullDisplayBackdropWidthPixels();
+                int heightPixels = (widthPixels *
+                        currentNews.getImageHeight() / currentNews.getImageWidth());
+
+                // Display image using Picasso using custom image height and width. If there is any
+                // error, show default image R.drawable.no_backdrop.
+                Picasso.with(context)
+                        .load(image)
+                        .resize(widthPixels, heightPixels)
+                        .centerCrop()
+                        .error(R.drawable.no_backdrop)
+                        .into(imageView);
+            } else
+                // Display image using Picasso using the predefined sizes for imageView. If there is
+                // any error, show default image R.drawable.no_backdrop.
+                Picasso.with(context)
+                        .load(image)
+                        .error(R.drawable.no_backdrop)
+                        .into(imageView);
+        } else
+            imageView.setVisibility(View.GONE);
+
+        // News ticker and header.
+        String htmlText = "";
+        String newsTicker = currentNews.getNewsTicker();
+        String header = currentNews.getHeader();
+        if (!newsTicker.equals("")) {
+            htmlText = "<strong>" + newsTicker + "</strong>";
+            if (!header.equals(""))
+                htmlText = htmlText + " · " + header;
+        } else if (!header.equals(""))
+            htmlText = header;
+        if (!htmlText.equals(""))
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                headerTextView.setText(Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                headerTextView.setText(Html.fromHtml(htmlText));
+            }
+        else
+            headerTextView.setVisibility(View.GONE);
+
+        // News title.
+        String title = currentNews.getTitle();
+        if (!title.equals(""))
+            titleTextView.setText(title);
+        else
+            titleTextView.setVisibility(View.GONE);
+
+        // News date.
+        String date = DateTimeUtils.getStringFromDate(currentNews.getDate(), dateFormat);
+        if (!title.equals(""))
+            dateTextView.setText(date);
+        else
+            dateTextView.setVisibility(View.GONE);
     }
 }
