@@ -1,9 +1,10 @@
-package com.davidburgosprieto.android.pruebajson.utils;
+package com.davidburgosprieto.android.pruebajson.model;
 
 import android.net.Uri;
 import android.util.Log;
 
-import com.davidburgosprieto.android.pruebajson.News;
+import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
+import com.davidburgosprieto.android.pruebajson.utils.NetworkUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,8 +16,8 @@ import java.util.Date;
 /**
  * Public class with static resources for fetching data from OMDB.
  */
-public class NewsJSONUtils {
-    private final static String TAG = NewsJSONUtils.class.getSimpleName();
+public class NewsJSON {
+    private final static String TAG = NewsJSON.class.getSimpleName();
 
     // URL.
     private final static String BASE_URL = "https://api.myjson.com/bins/8p7vg";
@@ -133,7 +134,7 @@ public class NewsJSONUtils {
      * @return the String value associated to the given key, or an empty String if the key does not
      * exist.
      */
-    static public String getStringFromJSON(JSONObject jsonObject, String key) {
+    static private String getStringFromJSON(JSONObject jsonObject, String key) {
         String methodTAG = TAG + "." + Thread.currentThread().getStackTrace()[2].getMethodName();
         String value = "";
 
@@ -155,7 +156,7 @@ public class NewsJSONUtils {
      * @param key        is the key to search into the JSON object.
      * @return the int value associated to the given key, or 0 if the key does not exist.
      */
-    static public int getIntFromJSON(JSONObject jsonObject, String key) {
+    static private int getIntFromJSON(JSONObject jsonObject, String key) {
         String methodTAG = TAG + "." + Thread.currentThread().getStackTrace()[2].getMethodName();
         int value = 0;
 

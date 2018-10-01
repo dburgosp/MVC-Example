@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson;
+package com.davidburgosprieto.android.pruebajson.model;
 
 import java.util.Date;
 

@@ -32,15 +32,18 @@ public final class NetworkUtils {
     public static boolean isConnected(Context context) {
         String methodTAG = TAG + "." + Thread.currentThread().getStackTrace()[2].getMethodName();
 
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = null;
-        try {
-            activeNetwork = cm.getActiveNetworkInfo();
-        } catch (NullPointerException e) {
-            Log.e(methodTAG, "Error getting active network info: " + e);
-        }
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (context != null) {
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = null;
+            try {
+                activeNetwork = cm.getActiveNetworkInfo();
+            } catch (NullPointerException e) {
+                Log.e(methodTAG, "Error getting active network info: " + e);
+            }
+            return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        } else
+            return false;
     }
 
     /**
@@ -49,7 +52,7 @@ public final class NetworkUtils {
      * @param builtUri is the given Uri.
      * @return the Url built from the given Uri.
      */
-    public static URL buildUrlFromUri(Uri builtUri) {
+    static URL buildUrlFromUri(Uri builtUri) {
         String methodTAG = TAG + "." + Thread.currentThread().getStackTrace()[2].getMethodName();
 
         URL url = null;

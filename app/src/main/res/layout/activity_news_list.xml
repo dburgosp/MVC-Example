@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".controller.NewsListActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -29,12 +29,11 @@
             android:layout_marginTop="8dp"
             tools:text="Loading..." />
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/first_news_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:orientation="vertical">
+            android:background="?android:attr/selectableItemBackground">
 
             <TextView
                 android:id="@+id/first_news_ticker_and_header"
@@ -43,12 +42,15 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:textAllCaps="true"
+                android:textSize="12sp"
                 tools:text="News Ticker + Header" />
 
             <TextView
                 android:id="@+id/first_news_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/first_news_ticker_and_header"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
@@ -61,12 +63,14 @@
                 android:id="@+id/first_news_line"
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
+                android:layout_below="@id/first_news_title"
                 android:background="@color/colorGray" />
 
             <TextView
                 android:id="@+id/first_news_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/first_news_line"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
@@ -79,9 +83,10 @@
                 android:id="@+id/first_news_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/first_news_date"
                 android:scaleType="centerCrop"
                 tools:src="@drawable/no_backdrop" />
-        </LinearLayout>
+        </RelativeLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/news_recycler_view"
