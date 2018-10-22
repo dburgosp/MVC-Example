@@ -1,6 +1,6 @@
-package com.davidburgosprieto.android.pruebajson.view;
+package com.davidburgosprieto.android.pruebajson.view.implementations;
 
-import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,10 +12,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.davidburgosprieto.android.pruebajson.R;
+import com.davidburgosprieto.android.pruebajson.common.BaseObservableViewMvc;
+import com.davidburgosprieto.android.pruebajson.common.utils.DateTimeUtils;
+import com.davidburgosprieto.android.pruebajson.common.utils.NewsViewUtils;
 import com.davidburgosprieto.android.pruebajson.controller.NewsListAdapter;
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
-import com.davidburgosprieto.android.pruebajson.model.NewsViewUtils;
+import com.davidburgosprieto.android.pruebajson.view.ViewMvcFactory;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListItemViewMvc;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListViewMvc;
 
 import java.util.ArrayList;
 
@@ -25,17 +29,15 @@ import java.util.ArrayList;
  * interface really belongs to the UI Layer) to any Controller classes that need this information
  * (at present, {@link com.davidburgosprieto.android.pruebajson.controller.NewsListActivity}).
  */
-public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsListViewMvc {
+public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.Listener>
+        implements NewsListItemViewMvc.Listener, NewsListViewMvc {
 
-    private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
-    private RelativeLayout mFirstNewsLayout;
-    private TextView mLoadingTextView, mHeaderTextView, mTitleTextView, mDateTextView;
-    private ImageView mImageView;
-    private NewsListAdapter mNewsListAdapter;
-
-    private final View mRootView;
-    private final ArrayList<Listener> mListeners = new ArrayList<>();
+    private final ProgressBar mProgressBar;
+    private final RecyclerView mRecyclerView;
+    private final RelativeLayout mFirstNewsLayout;
+    private final TextView mLoadingTextView, mHeaderTextView, mTitleTextView, mDateTextView;
+    private final ImageView mImageView;
+    private final NewsListAdapter mNewsListAdapter;
 
     /**
      * Constructor for this class.
@@ -44,8 +46,10 @@ public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsLi
      *                 files into their corresponding View objects.
      * @param parent   is the root View of the generated hierarchy.
      */
-    public NewsListViewMvcImpl(LayoutInflater inflater, ViewGroup parent) {
-        mRootView = inflater.inflate(R.layout.activity_news_list, parent, false);
+    public NewsListViewMvcImpl(LayoutInflater inflater, @Nullable ViewGroup parent,
+                               ViewMvcFactory viewMvcFactory) {
+        // Use the setRootView method from the BaseViewMvc abstract class.
+        setRootView(inflater.inflate(R.layout.activity_news_list, parent, false));
 
         // Initialise layout elements.
         mProgressBar = findViewById(R.id.news_loading_progress_bar);
@@ -57,6 +61,7 @@ public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsLi
         mDateTextView = findViewById(R.id.first_news_date);
         mImageView = findViewById(R.id.first_news_image);
 
+        // Hide elements by default.
         mFirstNewsLayout.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.GONE);
@@ -71,7 +76,7 @@ public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsLi
         // Set the Adapter for the RecyclerView. The listener is this class, which implements
         // NewsListAdapter.OnItemClickListener, so clicks on adapter elements will be resolved in
         // the overridden onItemClick method.
-        mNewsListAdapter = new NewsListAdapter(new ArrayList<News>(), this);
+        mNewsListAdapter = new NewsListAdapter(new ArrayList<News>(), this, viewMvcFactory);
         mRecyclerView.setAdapter(mNewsListAdapter);
     }
 
@@ -104,42 +109,17 @@ public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsLi
     }
 
     /**
-     * Public method for registering to onItemClick events.
-     *
-     * @param listener is the Listener that will be added to the list of Listeners.
-     */
-    @Override
-    public void registerListener(Listener listener) {
-        mListeners.add(listener);
-    }
-
-    /**
-     * Public method for unregistering from receiving onItemClick events.
-     *
-     * @param listener is the Listener that will be removed from the list of Listeners.
-     */
-    @Override
-    public void unregisterListener(Listener listener) {
-        mListeners.remove(listener);
-    }
-
-    /**
      * Public interface method that will be implemented in the Listeners that have been previously
-     * subscribed through {@link #registerListener(Listener)} method.
+     * subscribed through the getListeners() method from the BaseObservableViewMvc abstract class.
      *
      * @param item        is the News object with the clickedView info.
      * @param clickedView is the View that have received the click event.
      */
     @Override
     public void onItemClick(News item, View clickedView) {
-        for (Listener listener : mListeners) {
+        for (Listener listener : getListeners()) {
             listener.onItemClick(item, clickedView);
         }
-    }
-
-    @Override
-    public View getRootView() {
-        return mRootView;
     }
 
     /**
@@ -193,26 +173,5 @@ public class NewsListViewMvcImpl implements NewsListItemViewMvc.Listener, NewsLi
         otherNews.remove(0);
         mNewsListAdapter.updateNewsArrayList(otherNews);
         mRecyclerView.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * Private custom getContext() method.
-     *
-     * @return the context of this activity.
-     */
-    private Context getContext() {
-        return getRootView().getContext();
-    }
-
-    /**
-     * Private custom findViewById method. Finds a view that was identified by the id attribute from
-     * the XML that was processed in the constructor of this class.
-     *
-     * @param id is the resource identifier.
-     * @return the view if found or null otherwise.
-     */
-    @SuppressWarnings("unchecked")
-    private <T extends View> T findViewById(int id) {
-        return (T) getRootView().findViewById(id);
     }
 }

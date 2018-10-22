@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson.view;
+package com.davidburgosprieto.android.pruebajson.view.implementations;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,11 +7,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.davidburgosprieto.android.pruebajson.R;
+import com.davidburgosprieto.android.pruebajson.common.BaseObservableViewMvc;
+import com.davidburgosprieto.android.pruebajson.common.utils.DateTimeUtils;
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
-import com.davidburgosprieto.android.pruebajson.model.NewsViewUtils;
-
-import java.util.ArrayList;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListItemViewMvc;
+import com.davidburgosprieto.android.pruebajson.common.utils.NewsViewUtils;
 
 /**
  * View class for representing a news element in the news list. It contains UI Layer logic and sends
@@ -20,9 +20,10 @@ import java.util.ArrayList;
  * information (at present,
  * {@link com.davidburgosprieto.android.pruebajson.controller.NewsListAdapter}).
  */
-public class NewsListItemViewMvcImpl implements NewsListItemViewMvc {
-    private View mRootView;
-    private final ArrayList<Listener> mListeners = new ArrayList<>();
+public class NewsListItemViewMvcImpl
+        extends BaseObservableViewMvc<NewsListItemViewMvc.Listener>
+        implements NewsListItemViewMvc {
+
     private News mNews;
     private ImageView mImageView;
     private TextView mTitleTextView, mHeaderTextView, mDateTextView;
@@ -35,7 +36,8 @@ public class NewsListItemViewMvcImpl implements NewsListItemViewMvc {
      * @param parent   is the root View of the generated hierarchy.
      */
     public NewsListItemViewMvcImpl(LayoutInflater inflater, final ViewGroup parent) {
-        mRootView = inflater.inflate(R.layout.list_item, parent, false);
+        // Use the setRootView method from the BaseViewMvc abstract class.
+        setRootView(inflater.inflate(R.layout.list_item, parent, false));
 
         // Initialise layout elements.
         mImageView = findViewById(R.id.news_image);
@@ -43,30 +45,16 @@ public class NewsListItemViewMvcImpl implements NewsListItemViewMvc {
         mHeaderTextView = findViewById(R.id.news_header);
         mDateTextView = findViewById(R.id.news_date);
 
-        // Set a click listener for the entire root view.
+        // Set a click listener for the entire root view. We use the getListeners() method from the
+        // BaseObservableViewMvc abstract class to get the list of listeners.
         getRootView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (Listener listener : mListeners) {
+                for (Listener listener : getListeners()) {
                     listener.onItemClick(mNews, parent);
                 }
             }
         });
-    }
-
-    @Override
-    public void registerListener(Listener listener) {
-        mListeners.add(listener);
-    }
-
-    @Override
-    public void unregisterListener(Listener listener) {
-        mListeners.remove(listener);
-    }
-
-    @Override
-    public View getRootView() {
-        return mRootView;
     }
 
     @Override
@@ -87,17 +75,5 @@ public class NewsListItemViewMvcImpl implements NewsListItemViewMvc {
         // News date.
         NewsViewUtils.setText(mDateTextView, DateTimeUtils.getStringFromDate(mNews.getDate(),
                 DateTimeUtils.DATE_FORMAT_MEDIUM));
-    }
-
-    /**
-     * Private custom findViewById method. Finds a view that was identified by the id attribute from
-     * the XML that was processed in the constructor of this class.
-     *
-     * @param id is the resource identifier.
-     * @return the view if found or null otherwise.
-     */
-    @SuppressWarnings("unchecked")
-    private <T extends View> T findViewById(int id) {
-        return (T) getRootView().findViewById(id);
     }
 }

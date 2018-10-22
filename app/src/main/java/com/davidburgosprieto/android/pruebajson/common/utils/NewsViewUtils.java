@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson.model;
+package com.davidburgosprieto.android.pruebajson.common.utils;
 
 import android.content.Context;
 import android.text.Html;
@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.davidburgosprieto.android.pruebajson.R;
-import com.davidburgosprieto.android.pruebajson.utils.DisplayUtils;
 import com.squareup.picasso.Picasso;
 
 public class NewsViewUtils {

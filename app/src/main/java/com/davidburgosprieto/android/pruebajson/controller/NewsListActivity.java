@@ -2,123 +2,63 @@ package com.davidburgosprieto.android.pruebajson.controller;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 
+import com.davidburgosprieto.android.pruebajson.model.FetchNewsListUseCase;
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.model.NewsAsyncTaskLoader;
-import com.davidburgosprieto.android.pruebajson.view.NewsListViewMvc;
-import com.davidburgosprieto.android.pruebajson.view.NewsListViewMvcImpl;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListViewMvc;
+import com.davidburgosprieto.android.pruebajson.view.implementations.NewsListViewMvcImpl;
 import com.davidburgosprieto.android.pruebajson.R;
-import com.davidburgosprieto.android.pruebajson.utils.NetworkUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Controller class. It contains application layer logic and no UI layer logic. NewsListActivity
  * implements NewsListViewMvcImpl.Listener for receiving user interaction events managed by the
  * View class NewsListViewMvcImpl.
  */
-public class NewsListActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<ArrayList<News>>, NewsListViewMvc.Listener {
+public class NewsListActivity
+        extends BaseActivity
+        implements NewsListViewMvc.Listener, FetchNewsListUseCase.Listener {
 
-    private final String TAG = NewsListActivity.class.getSimpleName();
-    public static final int LOADER_ID = 0;
-    private ArrayList<News> news;
-    private Loader<ArrayList<News>> loader = null;
     private NewsListViewMvc mViewMvc;
+    private FetchNewsListUseCase mFetchNewsListUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Migrate UI logic into the view and register for receiving UI events from the View class
-        // NewsListViewMvcImpl.
-        mViewMvc = new NewsListViewMvcImpl(LayoutInflater.from(this), null);
-        mViewMvc.registerListener(this);
+        // NewsListViewMvcImpl. Here we use dependency injection to achieve this, so we don't depend
+        // on a specific implementation of NewsListViewMvc.
+        mViewMvc = getCompositionRoot().getViewMvcFactory().getNewsListViewMvc(null);
+
+        // Get the NewsAsyncTaskViewUseCase object for fetching the news list from the server.
+        mFetchNewsListUseCase = getCompositionRoot().getNewsAsyncTaskViewUseCase();
+
         setContentView(mViewMvc.getRootView());
-
-        // Create an AsyncTaskLoader for retrieving the list of news.
-        if (loader == null) {
-            // If this is the first time, init loader.
-            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-        } else {
-            // If it is not the first time, restart loader.
-            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
-        }
-
-    }
-
-    @NonNull
-    @Override
-    public Loader<ArrayList<News>> onCreateLoader(int i, @Nullable Bundle bundle) {
-        if (NetworkUtils.isConnected(this)) {
-            // Loading...
-            mViewMvc.setProgress(true);
-            mViewMvc.setInfoMessage(R.string.loading_data);
-
-            // There is an available connection. Fetch news from server.
-            loader = new NewsAsyncTaskLoader(this, news);
-            return loader;
-        } else {
-            // There is no connection. Show error message.
-            mViewMvc.setInfoMessage(R.string.no_connection);
-            return null;
-        }
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<ArrayList<News>> loader, ArrayList<News> data) {
-        String methodTag = TAG + "." + Thread.currentThread().getStackTrace()[2].getMethodName();
+    protected void onStart() {
+        super.onStart();
 
-        // Hide progress bar.
-        mViewMvc.setProgress(false);
+        // Register for UI changes and show progress indicator.
+        mViewMvc.registerListener(this);
+        mViewMvc.setProgress(true);
 
-        // Check if there is an available connection.
-        if (NetworkUtils.isConnected(this)) {
-            // Hide loading TextView.
-            mViewMvc.setInfoMessage(0);
-
-            // If there is a valid result, display it on its corresponding layouts.
-            news = data;
-            if (news != null && news.size() > 0) {
-                Log.i(methodTag, "Search results for news not null.");
-
-                // Order results by date.
-                Collections.sort(news, new Comparator<News>() {
-                    @Override
-                    public int compare(News news2, News news1) {
-                        return news1.getDate().compareTo(news2.getDate());
-                    }
-                });
-
-                // Display newer news result.
-                mViewMvc.bindNewerNews(news);
-
-                // Display the other news.
-                mViewMvc.bindOtherNews(news);
-
-                // TODO: show news elements playing some cool animation.
-            } else {
-                // No data has been fetched from server.
-                mViewMvc.setInfoMessage(R.string.no_data);
-            }
-        } else {
-            // There is no connection. Show error message.
-            mViewMvc.setInfoMessage(R.string.no_connection);
-        }
+        // Fetch the news and register for changes on this process.
+        mFetchNewsListUseCase.registerListener(this);
+        mFetchNewsListUseCase.fetchNewsListAndNotify();
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<ArrayList<News>> loader) {
+    protected void onStop() {
+        super.onStop();
+
+        // Unregister all listeners for avoiding memory leaks.
+        mViewMvc.unregisterListener(this);
+        mFetchNewsListUseCase.unregisterListener(this);
     }
 
     /**
@@ -130,5 +70,45 @@ public class NewsListActivity extends AppCompatActivity
         Intent intent = new Intent(this, WebViewActivity.class);
         intent.putExtra("url", item.getUrl());
         startActivity(intent);
+    }
+
+    /**
+     * Implement interface {@link FetchNewsListUseCase.Listener#onNewsListFetched(ArrayList)} method
+     * here, for displaying the news list.
+     *
+     * @param news is the list of news received from the listener.
+     */
+    @Override
+    public void onNewsListFetched(ArrayList<News> news) {
+        // Hide progress indicator.
+        mViewMvc.setProgress(false);
+
+        // Display newer news result.
+        mViewMvc.bindNewerNews(news);
+
+        // Display the other news.
+        mViewMvc.bindOtherNews(news);
+    }
+
+    /**
+     * Implement interface {@link FetchNewsListUseCase.Listener#onNoNewsListFetched()} method here,
+     * for displaying the corresponding message.
+     */
+    @Override
+    public void onNoNewsListFetched() {
+        // Hide progress indicator and show message.
+        mViewMvc.setProgress(false);
+        mViewMvc.setInfoMessage(R.string.no_data);
+    }
+
+    /**
+     * Implement interface {@link FetchNewsListUseCase.Listener#onNoConnection()} method here, for
+     * displaying the corresponding message.
+     */
+    @Override
+    public void onNoConnection() {
+        // Hide progress indicator and show message.
+        mViewMvc.setProgress(false);
+        mViewMvc.setInfoMessage(R.string.no_connection);
     }
 }

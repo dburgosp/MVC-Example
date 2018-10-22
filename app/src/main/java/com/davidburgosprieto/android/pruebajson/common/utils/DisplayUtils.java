@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson.utils;
+package com.davidburgosprieto.android.pruebajson.common.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -42,7 +42,7 @@ public class DisplayUtils {
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager windowManager =
                 (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        try {
+        if (windowManager != null) {
             windowManager.getDefaultDisplay().getMetrics(metrics);
 
             displayWidthPixels = metrics.widthPixels;
@@ -52,8 +52,8 @@ public class DisplayUtils {
             displayScaledDensity = metrics.scaledDensity;
             displayXdpi = metrics.xdpi;
             displayYdpi = metrics.ydpi;
-        } catch (java.lang.NullPointerException e) {
-            // If getDefaultDisplay() throws a NullPointerException, return default values.
+        } else {
+            // If we can't get the windowManager, use default values.
             displayWidthPixels = resources.getInteger(R.integer.default_display_width_pixels);
             displayHeightPixels = resources.getInteger(R.integer.default_display_height_pixels);
             displayDensityDpi = resources.getInteger(R.integer.default_display_density_dpi);
@@ -72,7 +72,7 @@ public class DisplayUtils {
             resources.getValue(R.string.default_display_ydpi, typedValue, true);
             displayYdpi = Float.valueOf(typedValue.string.toString());
 
-            Log.e(TAG, "Error while getting default display: " + e);
+            Log.e(TAG, "Error while getting default display");
         }
 
         Log.i(TAG, "density: " + displayDensity);

@@ -2,21 +2,22 @@ package com.davidburgosprieto.android.pruebajson.controller;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.view.NewsListItemViewMvc;
-import com.davidburgosprieto.android.pruebajson.view.NewsListItemViewMvcImpl;
+import com.davidburgosprieto.android.pruebajson.view.ViewMvcFactory;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListItemViewMvc;
 
 import java.util.ArrayList;
 
 public class NewsListAdapter
         extends RecyclerView.Adapter<NewsListAdapter.NewsListViewHolder>
         implements NewsListItemViewMvc.Listener {
+
     private static final String TAG = NewsListAdapter.class.getSimpleName();
     private final NewsListItemViewMvc.Listener mListener;
+    private final ViewMvcFactory mViewMvcFactory;
     private ArrayList<News> mNewsArrayList;
 
     /**
@@ -25,9 +26,11 @@ public class NewsListAdapter
      * @param newsArrayList is the list of news that will be represented into the adapter.
      * @param listener      is the listener for receiving the clicks.
      */
-    public NewsListAdapter(ArrayList<News> newsArrayList, NewsListItemViewMvc.Listener listener) {
+    public NewsListAdapter(ArrayList<News> newsArrayList, NewsListItemViewMvc.Listener listener,
+                           ViewMvcFactory viewMvcFactory) {
         mNewsArrayList = newsArrayList;
         mListener = listener;
+        mViewMvcFactory = viewMvcFactory;
     }
 
     /**
@@ -62,9 +65,8 @@ public class NewsListAdapter
     @Override
     public NewsListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Migrate UI logic into the view and register for receiving UI events from the View class
-        // NewsListItemViewMvcImpl.
-        NewsListItemViewMvc viewMvc = new NewsListItemViewMvcImpl(
-                LayoutInflater.from(parent.getContext()), parent);
+        // NewsListItemViewMvcImpl. Here we use dependency injection to achieve this.
+        NewsListItemViewMvc viewMvc = mViewMvcFactory.getNewsListItemViewMvc(parent);
         viewMvc.registerListener(this);
         return new NewsListViewHolder(viewMvc);
     }

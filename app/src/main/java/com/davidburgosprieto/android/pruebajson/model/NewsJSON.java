@@ -3,8 +3,8 @@ package com.davidburgosprieto.android.pruebajson.model;
 import android.net.Uri;
 import android.util.Log;
 
-import com.davidburgosprieto.android.pruebajson.utils.DateTimeUtils;
-import com.davidburgosprieto.android.pruebajson.utils.NetworkUtils;
+import com.davidburgosprieto.android.pruebajson.common.utils.DateTimeUtils;
+import com.davidburgosprieto.android.pruebajson.common.utils.NetworkUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

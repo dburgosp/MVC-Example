@@ -1,4 +1,4 @@
-package com.davidburgosprieto.android.pruebajson.utils;
+package com.davidburgosprieto.android.pruebajson.common.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

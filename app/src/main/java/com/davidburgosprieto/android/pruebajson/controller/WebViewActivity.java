@@ -1,36 +1,53 @@
 package com.davidburgosprieto.android.pruebajson.controller;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
-import com.davidburgosprieto.android.pruebajson.R;
-import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.view.NewsListViewMvc;
-import com.davidburgosprieto.android.pruebajson.view.NewsListViewMvcImpl;
-import com.davidburgosprieto.android.pruebajson.view.WebViewMvc;
-import com.davidburgosprieto.android.pruebajson.view.WebViewMvcImpl;
+import com.davidburgosprieto.android.pruebajson.view.interfaces.WebViewMvc;
 
-public class WebViewActivity extends AppCompatActivity {
-    private WebViewMvc mViewMvc;
+public class WebViewActivity
+        extends BaseActivity
+        implements WebViewMvc.Listener {
+
+    private WebViewMvc mWebViewMvc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Migrate UI logic into the View class WebViewMvcImpl.
-        mViewMvc = new WebViewMvcImpl(LayoutInflater.from(this), null);
+        // Migrate UI logic into the View class WebViewMvcImpl. Here we use dependency injection to
+        // achieve this.
+        mWebViewMvc = getCompositionRoot().getViewMvcFactory().getWebViewMvc(null);
 
-        // Get parameter from calling activity.
+        // Get parameter (url) from calling activity and load it into the WebView.
         String url = "http://www.marca.com/";
         if (getIntent().hasExtra("url"))
             url = getIntent().getStringExtra("url");
-        mViewMvc.loadUrl(url);
-        setContentView(mViewMvc.getRootView());
+        mWebViewMvc.loadUrl(url);
+
+        setContentView(mWebViewMvc.getRootView());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Register for listening UI events in the WebViewMvc.
+        mWebViewMvc.registerListener(this);
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Unregister for listening UI events in the WebViewMvc.
+        mWebViewMvc.unregisterListener(this);
+    }
+
+    @Override
+    public void onNavigateUpClicked() {
+        // Manage registered UI event in the WebViewMvc (onNavigateUpClicked) and call
+        // onBackPressed().
+        onBackPressed();
     }
 }

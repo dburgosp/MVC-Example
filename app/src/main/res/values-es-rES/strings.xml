@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Prueba JSON</string>
+    <string name="app_name">Prueba MVC</string>
     <string name="no_data">No hay datos para mostrar</string>
     <string name="no_connection">No hay conexión a Internet ahora mismo</string>
     <string name="loading_data">Obteniendo datos del servidor&#8230;</string>
+    <string name="string_hours">h</string>
+    <string name="string_minutes">m</string>
 </resources>

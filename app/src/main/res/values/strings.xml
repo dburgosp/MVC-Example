@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Prueba JSON</string>
+    <string name="app_name">MVC example</string>
     <string name="loading_data">Fetching data from server&#8230;</string>
     <string name="no_connection">There is no connection to the internet right now</string>
     <string name="no_data">There is no data to show</string>
