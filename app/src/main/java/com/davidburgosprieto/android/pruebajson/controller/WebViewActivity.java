@@ -1,6 +1,8 @@
 package com.davidburgosprieto.android.pruebajson.controller;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 
 import com.davidburgosprieto.android.pruebajson.view.interfaces.WebViewMvc;
 
@@ -46,8 +48,9 @@ public class WebViewActivity
 
     @Override
     public void onNavigateUpClicked() {
-        // Manage registered UI event in the WebViewMvc (onNavigateUpClicked) and call
-        // onBackPressed().
+        // Navigate to previous activity and finish this one when onNavigateUpClicked() UI event is
+        // triggered.
         onBackPressed();
+        finish();
     }
 }

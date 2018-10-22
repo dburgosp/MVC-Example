@@ -1,6 +1,9 @@
 package com.davidburgosprieto.android.pruebajson.view.implementations;
 
+import android.annotation.SuppressLint;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -44,9 +47,7 @@ public class WebViewMvcImpl
 
         // Initialise the WebView.
         mWebView = findViewById(R.id.news_web_view);
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        mWebView.setWebViewClient(new WebViewClient());
+        initWebView();
     }
 
     private void initToolbar() {
@@ -55,11 +56,24 @@ public class WebViewMvcImpl
         mToolbarViewMvc.enableUpButtonAndListen(new ToolbarViewMvcImpl.Listener() {
             @Override
             public void onNavigateUpClicked() {
-                for (Listener listener : getListeners()) {
-                    listener.onNavigateUpClicked();
+                // Navigate back inside the WebView, if possible. Otherwise, send a
+                // onNavigateUpClicked() event to every listener.
+                if (mWebView.canGoBack()) {
+                    mWebView.goBack();
+                } else {
+                    for (Listener listener : getListeners()) {
+                        listener.onNavigateUpClicked();
+                    }
                 }
             }
         });
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void initWebView() {
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        mWebView.setWebViewClient(new WebViewClient());
     }
 
     @Override
