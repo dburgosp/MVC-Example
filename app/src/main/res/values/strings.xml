@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">MVC example</string>
-    <string name="loading_data">Fetching data from server&#8230;</string>
     <string name="no_connection">There is no connection to the internet right now</string>
     <string name="no_data">There is no data to show</string>
-    <string name="string_hours">h</string>
-    <string name="string_minutes">m</string>
 </resources>

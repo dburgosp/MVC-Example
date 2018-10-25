@@ -1,8 +1,6 @@
 package com.davidburgosprieto.android.pruebajson.controller;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
 
 import com.davidburgosprieto.android.pruebajson.view.interfaces.WebViewMvc;
 
@@ -47,10 +45,22 @@ public class WebViewActivity
     }
 
     @Override
+    public void onBackPressed() {
+        if (!mWebViewMvc.canGoBack()) {
+            // Navigate to previous activity and implicitly finish this one, only if there are no
+            // more web pages to go up inside the WebView.
+            super.onBackPressed();
+        }
+    }
+
+    /**
+     * Implementation of WebViewMvc.Listener.
+     */
+    @Override
     public void onNavigateUpClicked() {
-        // Navigate to previous activity and finish this one when onNavigateUpClicked() UI event is
-        // triggered.
+        // When onNavigateUpClicked() UI event is triggered we call the overridden method
+        // onBackPressed() in order to determine if whether navigating back to previous activity (if
+        // there are no more web pages to go up inside the WebView) or not.
         onBackPressed();
-        finish();
     }
 }

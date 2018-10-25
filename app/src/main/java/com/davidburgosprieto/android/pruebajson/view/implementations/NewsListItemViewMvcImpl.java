@@ -28,6 +28,10 @@ public class NewsListItemViewMvcImpl
     private ImageView mImageView;
     private TextView mTitleTextView, mHeaderTextView, mDateTextView;
 
+    /* ************ */
+    /* CONSTRUCTORS */
+    /* ************ */
+
     /**
      * Constructor for this class.
      *
@@ -39,7 +43,7 @@ public class NewsListItemViewMvcImpl
         // Use the setRootView method from the BaseViewMvc abstract class.
         setRootView(inflater.inflate(R.layout.list_item, parent, false));
 
-        // Initialise layout elements.
+        // Get layout elements.
         mImageView = findViewById(R.id.news_image);
         mTitleTextView = findViewById(R.id.news_title);
         mHeaderTextView = findViewById(R.id.news_header);
@@ -57,6 +61,17 @@ public class NewsListItemViewMvcImpl
         });
     }
 
+    /* ************** */
+    /* PUBLIC METHODS */
+    /* ************** */
+
+    /**
+     * Public method to be used from MVC controllers that instantiate objects of
+     * {@link NewsListItemViewMvcImpl} class for binding a {@link News} object to the current list
+     * item.
+     *
+     * @param news is the {@link News} object to be bound to the current list item.
+     */
     @Override
     public void bindNews(News news) {
         mNews = news;

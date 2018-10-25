@@ -17,7 +17,7 @@ import com.davidburgosprieto.android.pruebajson.common.utils.DateTimeUtils;
 import com.davidburgosprieto.android.pruebajson.common.utils.NewsViewUtils;
 import com.davidburgosprieto.android.pruebajson.controller.NewsListAdapter;
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.view.ViewMvcFactory;
+import com.davidburgosprieto.android.pruebajson.view.dependencyinjection.ViewMvcFactory;
 import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListItemViewMvc;
 import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListViewMvc;
 
@@ -39,19 +39,25 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
     private final ImageView mImageView;
     private final NewsListAdapter mNewsListAdapter;
 
+    /* ************ */
+    /* CONSTRUCTORS */
+    /* ************ */
+
     /**
      * Constructor for this class.
      *
-     * @param inflater is the LayoutInflater from the calling activity for instantiating layout XML
-     *                 files into their corresponding View objects.
-     * @param parent   is the root View of the generated hierarchy.
+     * @param inflater       is the LayoutInflater from the calling activity for instantiating
+     *                       layout XML files into their corresponding View objects.
+     * @param parent         is the root View of the generated hierarchy.
+     * @param viewMvcFactory is the ViewMvcFactory for dependency injection, used for instantiating
+     *                       other functional classes.
      */
     public NewsListViewMvcImpl(LayoutInflater inflater, @Nullable ViewGroup parent,
                                ViewMvcFactory viewMvcFactory) {
         // Use the setRootView method from the BaseViewMvc abstract class.
         setRootView(inflater.inflate(R.layout.activity_news_list, parent, false));
 
-        // Initialise layout elements.
+        // Get layout elements.
         mProgressBar = findViewById(R.id.news_loading_progress_bar);
         mFirstNewsLayout = findViewById(R.id.first_news_layout);
         mRecyclerView = findViewById(R.id.news_recycler_view);
@@ -67,6 +73,19 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
         mProgressBar.setVisibility(View.GONE);
         mLoadingTextView.setVisibility(View.GONE);
 
+        // Create Adapter and init RecyclerView.
+        mNewsListAdapter = new NewsListAdapter(new ArrayList<News>(), this, viewMvcFactory);
+        initRecyclerView();
+    }
+
+    /* *************** */
+    /* PRIVATE METHODS */
+    /* *************** */
+
+    /**
+     * Private helper method for setting LayoutManager and Adapter for the RecyclerView.
+     */
+    private void initRecyclerView() {
         // Set the LayoutManager for the RecyclerView.
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.VERTICAL, false);
@@ -76,12 +95,16 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
         // Set the Adapter for the RecyclerView. The listener is this class, which implements
         // NewsListAdapter.OnItemClickListener, so clicks on adapter elements will be resolved in
         // the overridden onItemClick method.
-        mNewsListAdapter = new NewsListAdapter(new ArrayList<News>(), this, viewMvcFactory);
         mRecyclerView.setAdapter(mNewsListAdapter);
     }
 
+    /* ************** */
+    /* PUBLIC METHODS */
+    /* ************** */
+
     /**
-     * Public helper method for showing or hiding the ProgressBar.
+     * Public method to be used from MVC controllers that instantiate objects of
+     * {@link NewsListViewMvcImpl} class for showing or hiding the ProgressBar.
      *
      * @param onOff if true shows the ProgressBar, otherwise hides it.
      */
@@ -94,7 +117,8 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
     }
 
     /**
-     * Public helper method for displaying an info message.
+     * Public method to be used from MVC controllers that instantiate objects of
+     * {@link NewsListViewMvcImpl} class for displaying an info message.
      *
      * @param resourceId is the resource identifier for the text to be displayed. If the id equals 0
      *                   the corresponding TextView will be hidden.
@@ -123,7 +147,8 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
     }
 
     /**
-     * Display the newer news in a separate layout.
+     * Public method to be used from MVC controllers that instantiate objects of
+     * {@link NewsListViewMvcImpl} class for displaying the newer news in a separate layout.
      *
      * @param news is the array of news.
      */
@@ -162,9 +187,11 @@ public class NewsListViewMvcImpl extends BaseObservableViewMvc<NewsListViewMvc.L
     }
 
     /**
-     * Display all news but the first one in the RecyclerView.
+     * Public method to be used from MVC controllers that instantiate objects of
+     * {@link NewsListViewMvcImpl} class for displaying all news but the first one in the
+     * RecyclerView.
      *
-     * @param news is the array of news.
+     * @param news is the array of {@link News}.
      */
     @Override
     public void bindOtherNews(ArrayList<News> news) {

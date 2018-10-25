@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 
 import com.davidburgosprieto.android.pruebajson.model.FetchNewsListUseCase;
-import com.davidburgosprieto.android.pruebajson.view.ViewMvcFactory;
+import com.davidburgosprieto.android.pruebajson.view.dependencyinjection.ViewMvcFactory;
 
 /**
  * Public class, belonging to the Construction Set, that resolves dependencies and instantiate

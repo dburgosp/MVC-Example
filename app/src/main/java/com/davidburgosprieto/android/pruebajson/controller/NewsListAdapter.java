@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.davidburgosprieto.android.pruebajson.model.News;
-import com.davidburgosprieto.android.pruebajson.view.ViewMvcFactory;
+import com.davidburgosprieto.android.pruebajson.view.dependencyinjection.ViewMvcFactory;
 import com.davidburgosprieto.android.pruebajson.view.interfaces.NewsListItemViewMvc;
 
 import java.util.ArrayList;
@@ -23,8 +23,10 @@ public class NewsListAdapter
     /**
      * Constructor for this class.
      *
-     * @param newsArrayList is the list of news that will be represented into the adapter.
-     * @param listener      is the listener for receiving the clicks.
+     * @param newsArrayList  is the list of news that will be represented into the adapter.
+     * @param listener       is the listener for receiving the clicks.
+     * @param viewMvcFactory is the ViewMvcFactory for dependency injection, used for instantiating
+     *                       other functional classes.
      */
     public NewsListAdapter(ArrayList<News> newsArrayList, NewsListItemViewMvc.Listener listener,
                            ViewMvcFactory viewMvcFactory) {
@@ -36,7 +38,7 @@ public class NewsListAdapter
     /**
      * Public helper method to clear the current news arrayList.
      */
-    void clearNewsArrayList() {
+    public void clearNewsArrayList() {
         mNewsArrayList.clear();
         notifyDataSetChanged();
     }
